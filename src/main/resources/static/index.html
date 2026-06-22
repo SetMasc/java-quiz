@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body style="font-family: Arial, sans-serif; padding: 20px;">
+
+<h2>Quiz screen</h2>
+
+<div style="margin-bottom: 20px;">
+    <button onclick="sendQuestion('Question 1')">Send question 1</button>
+    <button onclick="sendQuestion('Question2')">Send question 2</button>
+    <button onclick="startGame()">Start Game</button>
+</div>
+
+<div style="border: 2px dashed #ccc; padding: 15px; background: #f9f9f9;">
+    <h3>Text to broadcast at server:</h3>
+    <p id="live-stream" style="font-size: 20px; color: green; font-weight: bold;">Waiting broadcast...</p>
+</div>
+
+<script>
+    let stompClient = null;
+
+    const socket = new SockJS('/ws-quiz');
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log('Successfully connected to sockets: ' + frame);
+
+        stompClient.subscribe('/topic/quiz-events', function (response) {
+            document.getElementById('live-stream').innerText = response.body;
+        });
+    });
+
+    function sendQuestion(questionText) {
+        stompClient.send("/app/next-question", {}, questionText);
+    }
+
+    function startGame(){
+
+    }
+</script>
+</body>
+</html>

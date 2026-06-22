@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<style>
+    .hide{
+        display:none;
+    }
+</style>
+<body>
+
+<div id="selection-screen">
+    <h3>Select action</h3>
+    <div style="justify-content: space-around; display: flex; flex-direction: column">
+        <button onclick="createRoom()">Create room</button>
+        <input id="join-input">Enter room code
+        <button type="submit" onclick="joinRoom()">Join room</button>
+    </div>
+</div>
+
+<p id="stream-space" class="alfa_modal"></p>
+
+<div id="login-screen" style="flex-direction: column" class="hide">
+    <h3>Enter your username</h3>
+    <input id="username-input">
+    <button type="submit" id="username-submit" onclick="joinLobby()">Submit</button>
+</div>
+
+<div id="lobby-screen" style="flex-direction: column; align-items: center", class="hide">
+    <ul id="lobby-users-list">
+
+    </ul>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

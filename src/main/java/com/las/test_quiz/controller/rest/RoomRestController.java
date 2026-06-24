@@ -1,14 +1,12 @@
 package com.las.test_quiz.controller.rest;
 
+import com.las.test_quiz.dto.UserAffiliationDTO;
 import com.las.test_quiz.model.Room;
 import com.las.test_quiz.model.User;
 import com.las.test_quiz.service.QuizRoomManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +19,14 @@ public class RoomRestController {
 
     public RoomRestController(QuizRoomManager roomManager) {
         this.roomManager = roomManager;
+    }
+
+
+    @PostMapping("/check-affiliation")
+    public ResponseEntity<UserAffiliationDTO> checkSession(@RequestBody Map<String, String> payload){
+        String token = payload.get("user_token");
+        UserAffiliationDTO result = roomManager.checkUserAffiliation(token);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/create")
@@ -48,4 +54,6 @@ public class RoomRestController {
         });
         return ResponseEntity.ok(result);
     }
+
+
 }

@@ -1,9 +1,11 @@
 package com.las.test_quiz.service;
 
+import com.las.test_quiz.dto.UserAffiliationDTO;
 import com.las.test_quiz.model.Room;
-import com.las.test_quiz.model.User;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -34,5 +36,29 @@ public class QuizRoomManager {
 
     public void closeRoom(String roomCode){
         activeRooms.remove(roomCode);
+    }
+
+    public UserAffiliationDTO checkUserAffiliation(String user_token){
+        List<Room> rooms = new ArrayList<>();
+
+        String roomCode = null;
+        boolean hasActiveSession = false;
+        boolean isHost = false;
+
+        activeRooms.forEach((s, room) -> rooms.add(room));
+        for(Room room : rooms){
+            if(room.getUsers().containsKey(user_token)){
+                hasActiveSession = true;
+                roomCode = room.getRoomCode();
+                if(room.getAdminHostToken().equals(user_token)){
+                    isHost = true;
+                }
+            }
+        }
+        return new UserAffiliationDTO(hasActiveSession, roomCode, isHost);
+    }
+
+    public Map<String, Room> getAllRooms(){
+        return activeRooms;
     }
 }

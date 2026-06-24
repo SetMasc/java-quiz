@@ -18,7 +18,7 @@
     <div style="justify-content: space-around; display: flex; flex-direction: column">
         <button onclick="createRoom()">Create room</button>
         <input id="join-input">Enter room code
-        <button type="submit" onclick="joinRoom()">Join room</button>
+        <button type="submit" onclick="loginRoom()">Join room</button>
     </div>
 </div>
 
@@ -27,7 +27,8 @@
 <div id="login-screen" style="flex-direction: column" class="hide">
     <h3>Enter your username</h3>
     <input id="username-input">
-    <button type="submit" id="username-submit" onclick="joinLobby()">Submit</button>
+<!--    <button type="submit" onclick="loginRoom()">Submit</button>-->
+    <button type="submit" id="username-submit">Submit</button>
 </div>
 
 <div id="lobby-screen" style="flex-direction: column; align-items: center", class="hide">

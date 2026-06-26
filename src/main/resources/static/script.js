@@ -74,32 +74,43 @@ async function joinRooom(){
     let roomStatus;
     let isHost = false;
 
-    const subscription = stompClient.subscribe("/user/queue/token", function (response) {
-        const responseData = JSON.parse(response.body);
-        user_token = responseData.token;
-        roomStatus = responseData.room_status;
-        if(responseData.isHost === "true"){
-            isHost = true;
-        }
-        sessionStorage.setItem("user_token", user_token);
-
-        subscription.unsubscribe();
-        switch (roomStatus){
-            case "LOBBY":{
-                showLobby();
-            }
-        }
-    });
-
     user_token = sessionStorage.getItem("user_token");
     const payload = {
         username: username,
         user_token: user_token
     };
-    stompClient.send("/app/rooms/" + room_code + "/join", {}, JSON.stringify(payload));
 
-    console.log(isHost);
+    await new Promise((resolve, reject) => {
+        const subscription = stompClient.subscribe('/user/queue/token', (response) => {
+            const responseData = JSON.parse(response.body);
+            user_token = responseData.token;
+            roomStatus = responseData.room_status;
+            if(responseData.isHost === "true"){
+                isHost = true;
+            }
+            sessionStorage.setItem("user_token", user_token);
+
+            subscription.unsubscribe();
+            resolve(responseData);
+        });
+
+        stompClient.send("/app/rooms/" + room_code + "/join", {}, JSON.stringify(payload));
+
+        setTimeout(() => {
+            subscription.unsubscribe();
+            reject(new Error("Response-wait timeout"));
+        }, 10000);
+    });
+
+
     stream_space.innerText = "Room " + room_code;
+
+    switch (roomStatus){
+        case "LOBBY":{
+            await showLobby();
+            // stompClient.sub
+        }
+    }
 }
 
 async function joinRoom() {

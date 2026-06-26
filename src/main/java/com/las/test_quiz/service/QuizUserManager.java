@@ -11,10 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class QuizUserManager {
     private final Map<String, User> activeUsers = new ConcurrentHashMap<>();
 
-    public User createUser(String sessionId, String username){
+    public User createUser(String username){
         User u = new User();
         u.setUsername(username);
-        u.setSessionId(sessionId);
         u.setScore(0);
         String generatedToken;
         do{

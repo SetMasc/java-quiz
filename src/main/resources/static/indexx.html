@@ -16,9 +16,11 @@
 <div id="selection-screen">
     <h3>Select action</h3>
     <div style="justify-content: space-around; display: flex; flex-direction: column">
-        <button onclick="createRoom()">Create room</button>
+<!--        <button onclick="createRoom() " id="create-room-btn">Create room</button>-->
+        <button id="create-room-btn">Create room</button>
         <input id="join-input">Enter room code
-        <button type="submit" onclick="loginRoom()">Join room</button>
+<!--        <button type="submit" onclick="loginRoom()">Join room</button>-->
+        <button type="submit">Join room</button>
     </div>
 </div>
 
@@ -27,7 +29,6 @@
 <div id="login-screen" style="flex-direction: column" class="hide">
     <h3>Enter your username</h3>
     <input id="username-input">
-<!--    <button type="submit" onclick="loginRoom()">Submit</button>-->
     <button type="submit" id="username-submit">Submit</button>
 </div>
 
@@ -37,6 +38,7 @@
     </ul>
 </div>
 
-<script src="script.js"></script>
+<!--<script src="script.js"></script>-->
+<script type="module" src="js/main.js"></script>
 </body>
 </html>

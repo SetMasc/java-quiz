@@ -1,6 +1,7 @@
 package com.las.test_quiz.controller.websocket;
 
-import com.las.test_quiz.model.User;
+import com.las.test_quiz.dto.RoomDTO;
+import com.las.test_quiz.model.Room;
 import com.las.test_quiz.service.QuizRoomManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -9,7 +10,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
-import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -19,21 +19,30 @@ public class RoomWSController {
 
     private final QuizRoomManager roomManager;
 
-    @MessageMapping("/rooms/{roomCode}/join")
+    @MessageMapping("/rooms/{roomCode}/newUser")
     @SendToUser("/queue/token")
-    public Map<String, String> joinRoom(Map<String, String> payload,
+    public Map<String, String> addUser(Map<String, String> payload,
                                         @DestinationVariable String roomCode){
         String username = null;
         String token = null;
         if (payload != null){
             username = payload.get("username");
-            token = payload.get("user_token");
+            token = payload.get("userToken");
         }
-        Map<String, String> response = roomManager.addUserToRoom(roomCode, username, token);
 
-        List<User> users = roomManager.getUsersInRoom(roomCode);
-        messagingTemplate.convertAndSend("/topic/room/" + roomCode, users);
+        Map<String, String> result = roomManager.addUserToRoom(roomCode, username, token);
 
-        return response;
+        if (!result.containsKey("error")) {
+            Room r = roomManager.getRoom(roomCode);
+            RoomDTO roomDTO = RoomDTO.builder()
+                    .roomCode(r.getRoomCode())
+                    .users(roomManager.getUsersInRoom(r.getRoomCode()))
+                    .status(r.getStatus())
+                    .build();
+
+            messagingTemplate.convertAndSend("/topic/room/" + roomCode, roomDTO);
+        }
+
+        return result;
     }
 }

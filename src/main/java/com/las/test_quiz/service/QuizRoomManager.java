@@ -1,6 +1,7 @@
 package com.las.test_quiz.service;
 
 import com.las.test_quiz.dto.UserAffiliationDTO;
+import com.las.test_quiz.dto.UserInRoomDTO;
 import com.las.test_quiz.model.Room;
 import com.las.test_quiz.model.User;
 import lombok.RequiredArgsConstructor;
@@ -44,33 +45,32 @@ public class QuizRoomManager {
                 user = userManager.createUser(username);
             }
 
-            boolean isHost = false;
-
             if (room.getAdminHostToken() == null) {
                 room.setAdminHostToken(user.getToken());
-                isHost = true;
-            } else if (room.getAdminHostToken().equals(user.getToken())) {
-                isHost = true;
             }
 
             room.getUsers().put(user.getToken(), user);
             System.out.println("Player " + user.getUsername() + " joined room " + roomCode);
 
             Map<String, String> response = new HashMap<>();
+            response.put("userId", user.getUserId().toString());
             response.put("token", user.getToken());
-            response.put("isHost", String.valueOf(isHost));
-            response.put("room_status", room.getStatus().toString());
 
             return response;
         }
     }
 
-    public List<User> getUsersInRoom(String roomCode){
+    public List<UserInRoomDTO> getUsersInRoom(String roomCode){
         Room r = activeRooms.get(roomCode);
-        List<User> result = new ArrayList<>();
+        List<UserInRoomDTO> result = new ArrayList<>();
         if(r != null){
             r.getUsers().forEach((s, u) ->{
-                result.add(u);
+                UserInRoomDTO userDTO = UserInRoomDTO.builder()
+                        .userId(u.getUserId())
+                        .score(u.getScore())
+                        .username(u.getUsername())
+                        .build();
+                result.add(userDTO);
             }) ;
         }
         return result;

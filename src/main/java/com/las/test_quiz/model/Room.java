@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 public class Room {
     private String roomCode;
-    private String adminSessionId;
     private String adminHostToken;
 
     private RoomStatus status = RoomStatus.LOBBY;

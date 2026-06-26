@@ -1,11 +1,12 @@
-package com.las.test_quiz.model;
+package com.las.test_quiz.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class User {
+@Builder
+public class UserInRoomDTO {
     private Long userId;
     private String username;
-    private String token;
     private int score;
 }

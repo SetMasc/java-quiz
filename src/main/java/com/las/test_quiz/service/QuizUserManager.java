@@ -6,14 +6,18 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class QuizUserManager {
     private final Map<String, User> activeUsers = new ConcurrentHashMap<>();
+    private final AtomicLong idCounter = new AtomicLong(1);
+
 
     public User createUser(String username){
         User u = new User();
         u.setUsername(username);
+        u.setUserId(idCounter.getAndIncrement());
         u.setScore(0);
         String generatedToken;
         do{

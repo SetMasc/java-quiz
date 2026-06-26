@@ -1,5 +1,4 @@
-import * as ui from "./ui.js";
-import * as api from "./api.js";
+const subscriptions = {};
 
 
 export async function getOrCreateUser(stompClient, roomCode, payload){
@@ -25,12 +24,32 @@ export async function getOrCreateUser(stompClient, roomCode, payload){
 }
 
 export function subscribeToRoom(stompClient, roomCode, onRoomUpdate) {
-    return stompClient.subscribe(`/topic/room/${roomCode}`, function (response) {
+    const topic = `/topic/room/${roomCode}`;
+
+    unsubscribeFromTopic(topic);
+
+    const subscription = stompClient.subscribe(topic, function (response) {
         const room = JSON.parse(response.body);
-        console.log("Получено обновление комнаты по сокету:", room);
 
         if (onRoomUpdate) {
             onRoomUpdate(room);
         }
     });
+
+    subscriptions[topic] = subscription;
+
+    return subscription;
 }
+
+
+export function unsubscribeFromTopic(topic) {
+    if (subscriptions[topic]) {
+        subscriptions[topic].unsubscribe();
+        delete subscriptions[topic];
+    }
+}
+
+export function exitRoom(stompClient, roomCode, payload){
+        stompClient.send("/app/rooms/" + roomCode + "/deleteUser", {}, JSON.stringify(payload));
+}
+

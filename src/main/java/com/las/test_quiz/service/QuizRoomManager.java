@@ -1,5 +1,6 @@
 package com.las.test_quiz.service;
 
+import com.las.test_quiz.dto.RoomDTO;
 import com.las.test_quiz.dto.UserAffiliationDTO;
 import com.las.test_quiz.dto.UserInRoomDTO;
 import com.las.test_quiz.model.Room;
@@ -31,7 +32,7 @@ public class QuizRoomManager {
         return r;
     }
 
-    public Map<String, String> addUserToRoom(String roomCode, String username, String token){
+    public Map<String, String> addUserToRoom(String roomCode, String username, String userToken){
         Room room = activeRooms.get(roomCode);
         if(room == null){
             return Map.of("error", "Room not found");
@@ -39,8 +40,8 @@ public class QuizRoomManager {
 
         synchronized (room){
             User user;
-            if (token != null && userManager.getAllUsers().containsKey(token)) {
-                user = userManager.getUser(token);
+            if (userToken != null && userManager.getAllUsers().containsKey(userToken)) {
+                user = userManager.getUser(userToken);
             } else {
                 user = userManager.createUser(username);
             }
@@ -60,6 +61,35 @@ public class QuizRoomManager {
         }
     }
 
+    public Map<String, String> deleteUserFromRoom(String roomCode, String userToken){
+        Room room = activeRooms.get(roomCode);
+        if(room == null){
+            return Map.of("error", "Room not found");
+        }
+        if(userToken == null){
+            return Map.of("error", "User not found");
+        }
+
+
+        synchronized (room){
+            Map<String, User> users = room.getUsers();
+
+            if(room.getAdminHostToken().equals(userToken)){
+                closeRoom(roomCode);
+                System.out.println("Room deleted");
+            }else{
+                users.remove(userToken);
+            }
+
+
+            System.out.println("Player " + userManager.getUser(userToken).getUsername() + " exit room " + roomCode);
+            userManager.deleteUser(userToken);
+
+            return Map.of("result", "success");
+
+        }
+    }
+
     public List<UserInRoomDTO> getUsersInRoom(String roomCode){
         Room r = activeRooms.get(roomCode);
         List<UserInRoomDTO> result = new ArrayList<>();
@@ -74,26 +104,6 @@ public class QuizRoomManager {
             }) ;
         }
         return result;
-    }
-
-    public UserAffiliationDTO checkUserAffiliation(String user_token){
-        List<Room> rooms = new ArrayList<>();
-
-        String roomCode = null;
-        boolean hasActiveSession = false;
-        boolean isHost = false;
-
-        activeRooms.forEach((s, room) -> rooms.add(room));
-        for(Room room : rooms){
-            if(room.getUsers().containsKey(user_token)){
-                hasActiveSession = true;
-                roomCode = room.getRoomCode();
-                if(room.getAdminHostToken().equals(user_token)){
-                    isHost = true;
-                }
-            }
-        }
-        return new UserAffiliationDTO(hasActiveSession, roomCode, isHost);
     }
 
     public void closeRoom(String roomCode){

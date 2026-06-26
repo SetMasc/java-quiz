@@ -45,4 +45,32 @@ public class RoomWSController {
 
         return result;
     }
+
+    @MessageMapping("/rooms/{roomCode}/deleteUser")
+    public Map<String, String> deleteUser(Map<String, String> payload,
+                                       @DestinationVariable String roomCode){
+        String token = null;
+        if (payload != null){
+            token = payload.get("userToken");
+        }
+
+        Map<String, String> result = roomManager.deleteUserFromRoom(roomCode, token);
+
+        if (!result.containsKey("error")) {
+            Room r = roomManager.getRoom(roomCode);
+            Object response;
+            if(r != null){
+                response = RoomDTO.builder()
+                        .roomCode(r.getRoomCode())
+                        .users(roomManager.getUsersInRoom(r.getRoomCode()))
+                        .status(r.getStatus())
+                        .build();
+            }else{
+                response = Map.of("status", "CLOSED");
+            }
+            messagingTemplate.convertAndSend("/topic/room/" + roomCode, response);
+        }
+
+        return result;
+    }
 }

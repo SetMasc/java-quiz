@@ -25,7 +25,7 @@ window.onload = function (){
     bindButton("create-room-btn", handleCreateRoom);
     bindButton("join-room-btn", handleJoinRoom);
     bindButton("login--username-submit", loginRoom);
-
+    bindButton("room-screen--exit-btn", handleExitRoom);
 }
 
 window.onclose = function () {
@@ -37,7 +37,7 @@ function bindButton(id, handler) {
     if (btn) btn.addEventListener("click", handler);
 }
 
-function renderLobby() {
+function renderRoom() {
     if (currentRoom) {
         switch (currentRoom.status) {
             case "LOBBY": {
@@ -45,7 +45,20 @@ function renderLobby() {
                 ui.renderPlayers(currentRoom.users, userId);
                 break;
             }
+            case "CLOSED": {
+                ui.hide("room-screen");
+                ui.show("selection-screen");
+                ws.unsubscribeFromTopic(`/topic/room/${roomCode}`);
+                break;
+            }
         }
+    }else{
+        ui.hide("room-screen");
+        ui.hide("room-screen--lobby");
+        ui.show("selection-screen");
+        ws.unsubscribeFromTopic(`/topic/room/${roomCode}`);
+        roomCode = null;
+        sessionStorage.setItem("roomCode", roomCode);
     }
 }
 
@@ -79,6 +92,17 @@ async function handleJoinRoom(){
     }
 }
 
+async function handleExitRoom(){
+    userToken = sessionStorage.getItem("userToken");
+    ws.exitRoom(stompClient, roomCode, {userToken: userToken});
+    currentRoom = JSON.parse(await api.getRoom(roomCode));
+    const currentUser = currentRoom.users.find(user => user.userId === userId);
+    if(!currentUser){
+        currentRoom = null;
+    }
+    renderRoom();
+}
+
 async function loginRoom() {
     let username_input = document.getElementById("login--username-input").value;
 
@@ -95,7 +119,7 @@ async function joinRoom() {
     try {
         currentRoom = ws.subscribeToRoom(stompClient, roomCode, (room) => {
             currentRoom = room;
-            renderLobby();
+            renderRoom();
         });
 
         const payload = {
@@ -110,7 +134,7 @@ async function joinRoom() {
         userToken = user.token;
         sessionStorage.setItem("userToken", userToken);
 
-        renderLobby();
+        renderRoom();
 
     } catch (err) {
         if (currentRoom) {

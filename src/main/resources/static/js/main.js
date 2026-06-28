@@ -1,4 +1,5 @@
 import * as ui from './ui.js'
+import {toggleSelection} from './ui.js'
 import * as api from './api.js'
 import * as ws from './ws.js'
 
@@ -26,6 +27,8 @@ window.onload = function (){
     bindButton("join-room-btn", handleJoinRoom);
     bindButton("login--username-submit", loginRoom);
     bindButton("room-screen--exit-btn", handleExitRoom);
+
+    bindButton("room-screen--code-placeholder", handleCopyCode);
 }
 
 window.onclose = function () {
@@ -46,16 +49,13 @@ function renderRoom() {
                 break;
             }
             case "CLOSED": {
-                ui.hide("room-screen");
-                ui.show("selection-screen");
+                toggleSelection(true);
                 ws.unsubscribeFromTopic(`/topic/room/${roomCode}`);
                 break;
             }
         }
     }else{
-        ui.hide("room-screen");
-        ui.hide("room-screen--lobby");
-        ui.show("selection-screen");
+        ui.toggleSelection(true);
         ws.unsubscribeFromTopic(`/topic/room/${roomCode}`);
         roomCode = null;
         sessionStorage.setItem("roomCode", roomCode);
@@ -101,6 +101,14 @@ async function handleExitRoom(){
         currentRoom = null;
     }
     renderRoom();
+}
+
+async function handleCopyCode(){
+    try{
+        await navigator.clipboard.writeText(roomCode);
+    }catch (err){
+        alert("Error : " + err.message);
+    }
 }
 
 async function loginRoom() {

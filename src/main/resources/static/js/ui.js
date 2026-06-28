@@ -17,8 +17,8 @@ export function setCode(roomCode){
 }
 
 export function toggleLogin(visible){
-    show("room-screen");
     if(visible){
+        show("room-screen");
         show("room-screen--login");
     }else{
         hide("room-screen--login");
@@ -26,11 +26,22 @@ export function toggleLogin(visible){
 }
 
 export function toggleLobby(visible){
-    show("room-screen");
     if(visible){
+        show("room-screen");
         show("room-screen--lobby");
     }else{
         hide("room-screen--lobby");
+    }
+}
+
+export function toggleSelection(visible){
+    if(visible){
+        show("selection-screen");
+        hide("room-screen");
+        toggleLogin(!visible);
+        toggleLobby(!visible);
+    }else {
+        hide("selection-screen");
     }
 }
 

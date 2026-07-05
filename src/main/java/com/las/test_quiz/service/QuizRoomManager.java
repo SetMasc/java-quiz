@@ -6,6 +6,7 @@ import com.las.test_quiz.dto.UserInRoomDTO;
 import com.las.test_quiz.model.Room;
 import com.las.test_quiz.model.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class QuizRoomManager {
     private final Map<String, Room> activeRooms = new ConcurrentHashMap<>();
@@ -28,7 +30,7 @@ public class QuizRoomManager {
             generatedCode = generate6DigitCode();
             r.setRoomCode(generatedCode);
         }while (activeRooms.putIfAbsent(generatedCode, r) != null);
-        System.out.println("Room " + generatedCode + " created");
+        log.info("Room {} created", generatedCode);
         return r;
     }
 
@@ -51,7 +53,7 @@ public class QuizRoomManager {
             }
 
             room.getUsers().put(user.getToken(), user);
-            System.out.println("Player " + user.getUsername() + " joined room " + roomCode);
+            log.info("User {} joined to room {}", user.getUsername(), roomCode);
 
             Map<String, String> response = new HashMap<>();
             response.put("userId", user.getUserId().toString());
@@ -76,15 +78,13 @@ public class QuizRoomManager {
 
             if(room.getAdminHostToken().equals(userToken)){
                 closeRoom(roomCode);
-                System.out.println("Room deleted");
+                log.info("Room {} deleted", roomCode);
             }else{
                 users.remove(userToken);
             }
 
-
-            System.out.println("Player " + userManager.getUser(userToken).getUsername() + " exit room " + roomCode);
+            log.info("User {} exit form room {}", userManager.getUser(userToken).getUsername(), roomCode);
             userManager.deleteUser(userToken);
-
             return Map.of("result", "success");
 
         }

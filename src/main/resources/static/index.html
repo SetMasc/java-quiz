@@ -2,46 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebSocket Test</title>
+    <title>Quiz</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 </head>
-<body style="font-family: Arial, sans-serif; padding: 20px;">
-
-<h2>Quiz screen</h2>
-
-<div style="margin-bottom: 20px;">
-    <button onclick="sendQuestion('Question 1')">Send question 1</button>
-    <button onclick="sendQuestion('Question2')">Send question 2</button>
-    <button onclick="startGame()">Start Game</button>
-</div>
-
-<div style="border: 2px dashed #ccc; padding: 15px; background: #f9f9f9;">
-    <h3>Text to broadcast at server:</h3>
-    <p id="live-stream" style="font-size: 20px; color: green; font-weight: bold;">Waiting broadcast...</p>
-</div>
-
-<script>
-    let stompClient = null;
-
-    const socket = new SockJS('/ws-quiz');
-    stompClient = Stomp.over(socket);
-
-    stompClient.connect({}, function (frame) {
-        console.log('Successfully connected to sockets: ' + frame);
-
-        stompClient.subscribe('/topic/quiz-events', function (response) {
-            document.getElementById('live-stream').innerText = response.body;
-        });
-    });
-
-    function sendQuestion(questionText) {
-        stompClient.send("/app/next-question", {}, questionText);
+<style>
+    .hide{
+        display:none;
     }
 
-    function startGame(){
-
+    .no-spinners::-webkit-outer-spin-button,
+    .no-spinners::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
-</script>
+
+    .no-spinners {
+        -moz-appearance: textfield;
+    }
+
+</style>
+<body>
+
+<div id="selection-screen">
+    <h3>Select action</h3>
+    <div style="justify-content: space-around; display: flex; flex-direction: column">
+        <button id="create-room-btn">Create room</button>
+        <input id="join-input" type="number" class="no-spinners">Enter room code
+        <button type="submit" id="join-room-btn">Join room</button>
+    </div>
+</div>
+
+
+<div id="room-screen" class="hide">
+    <div id="room-screen--header" style="justify-content: space-between; display: flex;">
+        <h1 id="room-screen--code-placeholder" style="cursor: pointer"></h1>
+        <div style="display: flex; justify-content: space-between">
+            <button id="room-screen--exit-btn">Exit</button>
+        </div>
+    </div>
+    <div id="room-screen--login" style="flex-direction: column" class="hide">
+        <h3>Enter your username</h3>
+        <input id="login--username-input">
+        <button type="submit" id="login--username-submit">Submit</button>
+    </div>
+
+    <div id="room-screen--lobby">
+        <ul id="lobby--users-list"></ul>
+
+    </div>
+
+</div>
+
+<p id="stream-space" class="alfa_modal"></p>
+
+
+<script type="module" src="/js/main.js"></script>
 </body>
 </html>

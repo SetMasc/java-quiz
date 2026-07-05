@@ -9,7 +9,7 @@ export async function handleCreateRoomBtn() {
         sessionStorage.setItem("username", "admin");
         sessionStorage.setItem("roomCode", data);
         ui.hide("selection-screen");
-        await joinRoom();   //todo
+        await joinRoom(data);
     } catch (err) {
         alert("Error : " + err.message);
     }
@@ -22,6 +22,7 @@ export async function handleJoinRoomBtn(){
         try{
             await api.getRoom(join_input);
             sessionStorage.setItem("roomCode", join_input);
+            ui.setCode(join_input);
             ui.hide("selection-screen");
             ui.toggleLogin(true);
         }catch (err){
@@ -35,7 +36,8 @@ export async function handleLoginRoomBtn() {
 
     if (username_input) {
         sessionStorage.setItem("username", username_input);
+        let roomCode = sessionStorage.getItem("roomCode");
         ui.toggleLogin(false);
-        await joinRoom();   //todo
+        await joinRoom(roomCode);
     }
 }

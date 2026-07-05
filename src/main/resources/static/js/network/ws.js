@@ -61,5 +61,6 @@ export function unsubscribeFromTopic(topic) {
 
 export function exitRoom(roomCode, payload){
         stompClient.send("/app/rooms/" + roomCode + "/deleteUser", {}, JSON.stringify(payload));
+        unsubscribeFromTopic(`/topic/room/${roomCode}`);
 }
 

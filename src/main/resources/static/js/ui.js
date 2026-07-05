@@ -46,9 +46,10 @@ export function toggleSelection(visible){
 }
 
 
-export async function renderRoom(currentRoom) {
-
+export function renderRoom(currentRoom) {
+    let userId = sessionStorage.getItem("userId");
     if (currentRoom) {
+        setCode(currentRoom.roomCode);
         switch (currentRoom.status) {
             case "LOBBY": {
                 toggleLobby(true);
@@ -57,13 +58,11 @@ export async function renderRoom(currentRoom) {
             }
             case "CLOSED": {
                 toggleSelection(true);
-                ws.unsubscribeFromTopic(`/topic/room/${roomCode}`);
                 break;
             }
         }
     }else{
         toggleSelection(true);
-        ws.unsubscribeFromTopic(`/topic/room/${roomCode}`);
         sessionStorage.setItem("roomCode", null);
     }
 }

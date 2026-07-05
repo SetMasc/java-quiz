@@ -20,7 +20,7 @@ window.onload = function (){
 
     bindButton("create-room-btn", main.handleCreateRoomBtn);
     bindButton("join-room-btn", main.handleJoinRoomBtn);
-    bindButton("login--username-submit", main.handleJoinRoomBtn);
+    bindButton("login--username-submit", main.handleLoginRoomBtn);
     bindButton("room-screen--exit-btn", room.handleExitRoom);
 
     bindButton("room-screen--code-placeholder", room.handleCopyCode);
@@ -58,46 +58,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 function bindButton(id, handler) {
     const btn = document.getElementById(id);
     if (btn) btn.addEventListener("click", handler);
-}
-
-
-
-
-
-
-
-
-
-
-async function joinRoom() {
-    userToken = sessionStorage.getItem("userToken");
-
-    try {
-        currentRoom = ws.subscribeToRoom(stompClient, roomCode, (room) => {
-            currentRoom = room;
-            renderRoom();
-        });
-
-        const payload = {
-            username: username,
-            userToken: userToken,
-            userId: userId
-        }
-
-        const user = await ws.getOrCreateUser(stompClient, roomCode, payload);
-
-        userId = user.userId;
-        userToken = user.token;
-        sessionStorage.setItem("userToken", userToken);
-
-        renderRoom();
-
-    } catch (err) {
-        if (currentRoom) {
-            currentRoom.unsubscribe();
-        }
-        alert("Error : " + err.message);
-    }
 }
 
 

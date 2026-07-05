@@ -32,17 +32,6 @@ public class RoomWSController {
 
         Map<String, String> result = roomManager.addUserToRoom(roomCode, username, token);
 
-        if (!result.containsKey("error")) {
-            Room r = roomManager.getRoom(roomCode);
-            RoomDTO roomDTO = RoomDTO.builder()
-                    .roomCode(r.getRoomCode())
-                    .users(roomManager.getUsersInRoom(r.getRoomCode()))
-                    .status(r.getStatus())
-                    .build();
-
-            messagingTemplate.convertAndSend("/topic/room/" + roomCode, roomDTO);
-        }
-
         return result;
     }
 

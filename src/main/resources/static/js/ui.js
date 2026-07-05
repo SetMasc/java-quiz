@@ -1,4 +1,4 @@
-
+import * as ws from './network/ws.js';
 
 
 export function hide(id){
@@ -42,6 +42,29 @@ export function toggleSelection(visible){
         toggleLobby(!visible);
     }else {
         hide("selection-screen");
+    }
+}
+
+
+export async function renderRoom(currentRoom) {
+
+    if (currentRoom) {
+        switch (currentRoom.status) {
+            case "LOBBY": {
+                toggleLobby(true);
+                renderPlayers(currentRoom.users, userId);
+                break;
+            }
+            case "CLOSED": {
+                toggleSelection(true);
+                ws.unsubscribeFromTopic(`/topic/room/${roomCode}`);
+                break;
+            }
+        }
+    }else{
+        toggleSelection(true);
+        ws.unsubscribeFromTopic(`/topic/room/${roomCode}`);
+        sessionStorage.setItem("roomCode", null);
     }
 }
 

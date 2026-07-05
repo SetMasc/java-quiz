@@ -1,7 +1,17 @@
 const subscriptions = {};
 
 
-export async function getOrCreateUser(stompClient, roomCode, payload){
+let stompClient = null;
+
+
+const socket = new SockJS('/ws-quiz');
+stompClient = Stomp.over(socket);
+
+stompClient.connect({}, function (frame) {
+    console.log('Successfully connected to sockets: ' + frame);
+});
+
+export async function getOrCreateUser(roomCode, payload){
     return await new Promise((resolve, reject) => {
         let timeout;
 
@@ -23,7 +33,7 @@ export async function getOrCreateUser(stompClient, roomCode, payload){
     });
 }
 
-export function subscribeToRoom(stompClient, roomCode, onRoomUpdate) {
+export function subscribeToRoom(roomCode, onRoomUpdate) {
     const topic = `/topic/room/${roomCode}`;
 
     unsubscribeFromTopic(topic);
@@ -49,7 +59,7 @@ export function unsubscribeFromTopic(topic) {
     }
 }
 
-export function exitRoom(stompClient, roomCode, payload){
+export function exitRoom(roomCode, payload){
         stompClient.send("/app/rooms/" + roomCode + "/deleteUser", {}, JSON.stringify(payload));
 }
 

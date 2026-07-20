@@ -2,6 +2,7 @@ package com.las.test_quiz.events;
 
 import com.las.test_quiz.dto.RoomDTO;
 import com.las.test_quiz.model.Room;
+import com.las.test_quiz.model.RoomStatus;
 import com.las.test_quiz.service.QuizRoomManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -42,6 +45,10 @@ public class WSSubscriptionsListener {
                     log.info("Broadcast to {} room's topic", roomCode);
                 }else{
                     log.warn("Room {} not found", roomCode);
+                    messagingTemplate.convertAndSend(destination, RoomDTO.builder()
+                            .status(RoomStatus.valueOf("CLOSED"))
+                            .build()
+                    );
                 }
             }catch (Exception e){
                 log.error("Error in room {}: ", roomCode, e);

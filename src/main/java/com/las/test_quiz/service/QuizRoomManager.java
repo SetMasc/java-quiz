@@ -107,6 +107,10 @@ public class QuizRoomManager {
     }
 
     public void closeRoom(String roomCode){
+        Room r = getRoom(roomCode);
+        r.getUsers().forEach((token, user)->{
+            userManager.deleteUser(token);
+        });
         activeRooms.remove(roomCode);
     }
 

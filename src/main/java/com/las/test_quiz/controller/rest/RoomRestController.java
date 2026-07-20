@@ -47,16 +47,4 @@ public class RoomRestController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Room not found");
     }
 
-    @GetMapping("/{roomCode}/lobby")
-    public ResponseEntity<List<User>> lobbyRoom(@PathVariable String roomCode){
-        Room r = roomManager.getRoom(roomCode);
-        List<User> result = new ArrayList<>();
-        Map<String, User> users = r.getUsers();
-        users.forEach((s, user) -> {
-            result.add(user);
-        });
-        return ResponseEntity.ok(result);
-    }
-
-
 }

@@ -1,15 +1,9 @@
 import * as ui from './ui.js'
 import * as api from './network/api.js'
-import * as ws from './network/ws.js'
 import * as main from './core/mainPageManager.js'
 import * as room from './core/roomManager.js'
 
-let stompClient = null;
 let roomCode = sessionStorage.getItem("roomCode");
-let currentRoom = null;
-let userToken = sessionStorage.getItem("userToken")
-let userId = null;
-let username= sessionStorage.getItem("username");
 
 const stream_space = document.getElementById("stream-space");
 

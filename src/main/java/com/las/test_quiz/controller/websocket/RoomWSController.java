@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -46,13 +47,15 @@ public class RoomWSController {
         Map<String, String> result = roomManager.deleteUserFromRoom(roomCode, token);
 
         if (!result.containsKey("error")) {
-            Room r = roomManager.getRoom(roomCode);
+
+            Optional<Room> r = roomManager.findRoom(roomCode);
             Object response;
-            if(r != null){
+            if(r.isPresent()){
+                Room room = r.get();
                 response = RoomDTO.builder()
-                        .roomCode(r.getRoomCode())
-                        .users(roomManager.getUsersInRoom(r.getRoomCode()))
-                        .status(r.getStatus())
+                        .roomCode(room.getRoomCode())
+                        .users(roomManager.getUsersInRoom(room.getRoomCode()))
+                        .status(room.getStatus())
                         .build();
             }else{
                 response = Map.of("status", "CLOSED");

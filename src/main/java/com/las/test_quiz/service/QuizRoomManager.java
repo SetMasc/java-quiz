@@ -1,7 +1,5 @@
 package com.las.test_quiz.service;
 
-import com.las.test_quiz.dto.RoomDTO;
-import com.las.test_quiz.dto.UserAffiliationDTO;
 import com.las.test_quiz.dto.UserInRoomDTO;
 import com.las.test_quiz.model.Room;
 import com.las.test_quiz.model.User;
@@ -9,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -42,11 +37,9 @@ public class QuizRoomManager {
 
         synchronized (room){
             User user;
-            if (userToken != null && userManager.getAllUsers().containsKey(userToken)) {
-                user = userManager.getUser(userToken);
-            } else {
-                user = userManager.createUser(username);
-            }
+            Optional<User> u = userManager.findUser(userToken);
+
+            user = u.orElseGet(() -> userManager.createUser(username));
 
             if (room.getAdminHostToken() == null) {
                 room.setAdminHostToken(user.getToken());
@@ -64,7 +57,7 @@ public class QuizRoomManager {
     }
 
     public Map<String, String> deleteUserFromRoom(String roomCode, String userToken){
-        Room room = activeRooms.get(roomCode);
+        Room room = getRoom(roomCode);
         if(room == null){
             return Map.of("error", "Room not found");
         }
@@ -83,7 +76,10 @@ public class QuizRoomManager {
                 users.remove(userToken);
             }
 
-            log.info("User {} exit form room {}", userManager.getUser(userToken).getUsername(), roomCode);
+            Optional<User> u = userManager.findUser(userToken);
+
+            u.ifPresent(user -> log.info("User {} exit form room {}", user.getUsername(), roomCode));
+
             userManager.deleteUser(userToken);
             return Map.of("result", "success");
 
@@ -114,9 +110,15 @@ public class QuizRoomManager {
         activeRooms.remove(roomCode);
     }
 
-    public Room getRoom(String roomCode){
+    private Room getRoom(String roomCode){
         return activeRooms.get(roomCode);
     }
+
+    public Optional<Room> findRoom(String roomCode){
+        return Optional.ofNullable(getRoom(roomCode));
+    }
+
+
 
     public Map<String, Room> getAllRooms(){
         return activeRooms;

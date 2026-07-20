@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -32,26 +33,23 @@ public class WSSubscriptionsListener {
 
             log.info("Got WS subscription to room {roomCode}", roomCode);
 
-            try{
-                Room currentRoom = roomManager.getRoom(roomCode);
-                if(currentRoom != null){
-                    messagingTemplate.convertAndSend(destination, RoomDTO.builder()
-                                    .roomCode(currentRoom.getRoomCode())
-                                    .users(roomManager.getUsersInRoom(currentRoom.getRoomCode()))
-                                    .status(currentRoom.getStatus())
-                                    .build()
-                    );
+            Optional<Room> r = roomManager.findRoom(roomCode);
+            if(r.isPresent()){
+                Room room = r.get();
+                messagingTemplate.convertAndSend(destination, RoomDTO.builder()
+                        .roomCode(room.getRoomCode())
+                        .users(roomManager.getUsersInRoom(room.getRoomCode()))
+                        .status(room.getStatus())
+                        .build()
+                );
 
-                    log.info("Broadcast to {} room's topic", roomCode);
-                }else{
+                log.info("Broadcast to {} room's topic", roomCode);
+            } else{
                     log.warn("Room {} not found", roomCode);
                     messagingTemplate.convertAndSend(destination, RoomDTO.builder()
-                            .status(RoomStatus.valueOf("CLOSED"))
+                            .status(RoomStatus.CLOSED)
                             .build()
                     );
-                }
-            }catch (Exception e){
-                log.error("Error in room {}: ", roomCode, e);
             }
         }
 

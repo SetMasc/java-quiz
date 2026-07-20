@@ -5,5 +5,6 @@ public enum RoomStatus {
     PLAYING,
     PAUSED,
     LEADERBOARD,
-    FINISHED
+    FINISHED,
+    CLOSED
 }

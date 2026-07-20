@@ -4,6 +4,7 @@ import com.las.test_quiz.model.User;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -38,9 +39,17 @@ public class QuizUserManager {
         activeUsers.remove(token);
     }
 
-    public User getUser(String token){
+    private User getUser(String token){
         return activeUsers.get(token);
     }
+
+    public Optional<User> findUser(String token){
+        if(token == null){
+            return Optional.empty();
+        }
+        return Optional.ofNullable(getUser(token));
+    }
+
 
     public Map<String, User> getAllUsers(){
         return activeUsers;

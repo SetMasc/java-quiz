@@ -2,10 +2,12 @@ package com.las.test_quiz.controller.websocket;
 
 import com.las.test_quiz.dto.RoomDTO;
 import com.las.test_quiz.model.Room;
+import com.las.test_quiz.model.RoomStatus;
 import com.las.test_quiz.service.QuizRoomManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
@@ -64,5 +66,42 @@ public class RoomWSController {
         }
 
         return result;
+    }
+
+
+    @MessageMapping("/rooms/{roomCode}/start")
+    public void startGame(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
+        Map<String, String> result = roomManager.startGame(roomCode, payload.get("token"));
+        if(result.get("result").equals("success")){
+            result = Map.of("status", "PLAYING");
+            messagingTemplate.convertAndSend("/topic/room/" + roomCode, result);
+        }
+    }
+
+    @MessageMapping("/rooms/{roomCode}/pause")
+    public void pauseGame(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
+        Map<String, String> result = roomManager.pauseGame(roomCode, payload.get("token"));
+        if(result.get("result").equals("success")){
+            result = Map.of("status", "PAUSED");
+            messagingTemplate.convertAndSend("/topic/room/" + roomCode, result);
+        }
+    }
+
+    @MessageMapping("/rooms/{roomCode}/resume")
+    public void resumeGame(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
+        Map<String, String> result = roomManager.resumeGame(roomCode, payload.get("token"));
+        if(result.get("result").equals("success")){
+            result = Map.of("status", "PLAYING");
+            messagingTemplate.convertAndSend("/topic/room/" + roomCode, result);
+        }
+    }
+
+    @MessageMapping("/rooms/{roomCode}/resume")
+    public void deleteRoom(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
+        Map<String, String> result = roomManager.resumeGame(roomCode, payload.get("token"));
+        if(result.get("result").equals("success")){
+            result = Map.of("status", "CLOSED");
+            messagingTemplate.convertAndSend("/topic/room/" + roomCode, result);
+        }
     }
 }

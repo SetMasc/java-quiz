@@ -1,10 +1,16 @@
 package com.las.test_quiz.service;
 
+import com.las.test_quiz.annotation.CheckHost;
 import com.las.test_quiz.dto.UserInRoomDTO;
+import com.las.test_quiz.exception.RoomNotFoundException;
+import com.las.test_quiz.model.Question;
 import com.las.test_quiz.model.Room;
+import com.las.test_quiz.model.RoomStatus;
 import com.las.test_quiz.model.User;
+import com.las.test_quiz.repos.QuestionRepos;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -16,6 +22,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class QuizRoomManager {
     private final Map<String, Room> activeRooms = new ConcurrentHashMap<>();
+
     private final QuizUserManager userManager;
 
     public Room createRoom(){
@@ -102,20 +109,57 @@ public class QuizRoomManager {
         return result;
     }
 
-    public void closeRoom(String roomCode){
-        Room r = getRoom(roomCode);
+    private void closeRoom(String roomCode){
+        Room r = getRoomOrThrow(roomCode);
         r.getUsers().forEach((token, user)->{
             userManager.deleteUser(token);
         });
         activeRooms.remove(roomCode);
     }
 
+    @CheckHost
+    public Map<String, String> startGame(String roomCode, String hostToken){
+        Room room = getRoomOrThrow(roomCode);
+        room.setStatus(RoomStatus.PLAYING);
+        room.setCurrentQuestionIndex(0);
+        return Map.of("result", "success");
+    }
+
+    @CheckHost
+    public Map<String, String> pauseGame(String roomCode, String hostToken){
+        Room room = getRoomOrThrow(roomCode);
+        room.setStatus(RoomStatus.PAUSED);
+        return Map.of("result", "success");
+    }
+
+    @CheckHost
+    public Map<String, String> resumeGame(String roomCode, String hostToken){
+        Room room = getRoomOrThrow(roomCode);
+        room.setStatus(RoomStatus.PLAYING);
+        return Map.of("result", "success");
+    }
+
+    @CheckHost
+    public Map<String, String> deleteRoom(String roomCode, String hostToken){
+        closeRoom(roomCode);
+        return Map.of("result", "success");
+    }
+
+
+    //напярмую возвращает содержимое без проверок на npe
     private Room getRoom(String roomCode){
         return activeRooms.get(roomCode);
     }
 
+    //возвращает с указанием, что может быть пусто, но это не повод кидать npe
     public Optional<Room> findRoom(String roomCode){
         return Optional.ofNullable(getRoom(roomCode));
+    }
+
+    //если null то возвращает rnfe
+    public Room getRoomOrThrow(String roomCode){
+        return findRoom(roomCode)
+                .orElseThrow(() -> new RoomNotFoundException(roomCode));
     }
 
 

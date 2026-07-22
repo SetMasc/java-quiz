@@ -96,7 +96,7 @@ public class QuizRoomManagerTest {
 
     @Test
     void getUsersInRoom_unknownRoom_returnsEmptyList() {
-        assertThat(roomManager.getUsersInRoom("000000").isEmpty());
+        assertThat(roomManager.getUsersInRoom("000000")).isEmpty();
     }
 
     @Test

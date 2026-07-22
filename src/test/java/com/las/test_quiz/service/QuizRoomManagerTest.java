@@ -13,7 +13,7 @@ public class QuizRoomManagerTest {
     @BeforeEach
     void setUp(){
         roomManager = new QuizRoomManager(new QuizUserManager());
-    };
+    }
 
 
     @Test

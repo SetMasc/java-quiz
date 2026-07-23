@@ -8,7 +8,7 @@
 </head>
 <style>
     .hide{
-        display:none;
+        display:none !important;
     }
 
     .no-spinners::-webkit-outer-spin-button,
@@ -49,6 +49,12 @@
 
     <div id="room-screen--lobby">
         <ul id="lobby--users-list"></ul>
+        <div id="lobby--admin-buttons"  class="hide">
+            <button id="start-game-btn">Start</button>
+            <button id="pause-game-btn">Pause</button>
+            <button id="resume-game-btn">Resume</button>
+            <button id="delete-room-btn">Delete</button>
+        </div>
 
     </div>
 

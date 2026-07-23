@@ -1,6 +1,5 @@
 import * as ws from "../network/ws.js";
 import * as ui from "../ui.js";
-import {setCode} from "../ui.js";
 
 
 
@@ -53,5 +52,50 @@ export async function joinRoom(roomCode) {
             roomSubscription.unsubscribe();
         }
 
+    }
+}
+
+
+export function handleStartGame(){
+    let userToken = sessionStorage.getItem("userToken");
+    let roomCode = sessionStorage.getItem("roomCode");
+
+    try{
+        ws.sendGameAction("start", roomCode, userToken);
+    }catch (err){
+        alert("Error : " + err.message);
+    }
+}
+
+export function handlePauseGame(){
+    let userToken = sessionStorage.getItem("userToken");
+    let roomCode = sessionStorage.getItem("roomCode");
+
+    try{
+        ws.sendGameAction("pause", roomCode, userToken);
+    }catch (err){
+        alert("Error : " + err.message);
+    }
+}
+
+export function handleResumeGame(){
+    let userToken = sessionStorage.getItem("userToken");
+    let roomCode = sessionStorage.getItem("roomCode");
+
+    try{
+        ws.sendGameAction("resume", roomCode, userToken);
+    }catch (err){
+        alert("Error : " + err.message);
+    }
+}
+
+export function handleDeleteRoom(){
+    let userToken = sessionStorage.getItem("userToken");
+    let roomCode = sessionStorage.getItem("roomCode");
+
+    try{
+        ws.sendGameAction("delete", roomCode, userToken);
+    }catch (err){
+        alert("Error : " + err.message);
     }
 }

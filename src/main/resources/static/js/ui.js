@@ -1,4 +1,7 @@
-import * as ws from './network/ws.js';
+import {checkAdmin} from "./network/api.js";
+
+const stream_space = document.getElementById("stream-space");
+
 
 
 export function hide(id){
@@ -46,22 +49,43 @@ export function toggleSelection(visible){
 }
 
 
-export function renderRoom(currentRoom) {
+export async function renderRoom(currentRoom) {
     let userId = sessionStorage.getItem("userId");
+    let userToken = sessionStorage.getItem("userToken")
+    let roomCode = currentRoom.roomCode;
+
     if (currentRoom) {
-        setCode(currentRoom.roomCode);
+        setCode(roomCode);
         switch (currentRoom.status) {
             case "LOBBY": {
                 toggleLobby(true);
                 renderPlayers(currentRoom.users, userId);
+
+                try {
+                    const isAdmin = await checkAdmin(roomCode, userToken);
+
+                    if (isAdmin) {
+                        show("lobby--admin-buttons");
+                    } else {
+                        hide("lobby--admin-buttons");
+                    }
+                } catch (err) {
+                    alert("Error : " + err.message);
+                    hide("lobby--admin-buttons");
+                }
+
                 break;
             }
             case "CLOSED": {
                 toggleSelection(true);
                 break;
             }
+            default: {
+                stream_space.innerText = currentRoom.status;
+                break;
+            }
         }
-    }else{
+    } else {
         toggleSelection(true);
         sessionStorage.setItem("roomCode", null);
     }
@@ -69,7 +93,7 @@ export function renderRoom(currentRoom) {
 
 
 
-export async function renderPlayers(players, userId) {
+function renderPlayers(players, userId) {
     const users_list = document.getElementById("lobby--users-list");
     users_list.textContent = null;
     players.forEach(item => {

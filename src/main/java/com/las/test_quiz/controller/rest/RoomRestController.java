@@ -7,6 +7,7 @@ import com.las.test_quiz.service.QuizRoomManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,5 +39,22 @@ public class RoomRestController {
                 .status(r.getStatus())
                 .build());
     }
+
+    @PostMapping("/{roomCode}/check-admin")
+    public ResponseEntity<Boolean> checkAdmin(
+            @PathVariable String roomCode,
+            @RequestBody Map<String, String> payload) {
+
+        Room r = roomManager.getRoomOrThrow(roomCode);
+        String userToken = payload.get("token");
+
+        if (userToken == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        boolean isAdmin = r.getAdminHostToken().equals(userToken);
+        return ResponseEntity.ok(isAdmin);
+    }
+
 
 }

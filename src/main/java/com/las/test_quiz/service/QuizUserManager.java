@@ -1,5 +1,6 @@
 package com.las.test_quiz.service;
 
+import com.las.test_quiz.exception.UserNotFoundException;
 import com.las.test_quiz.model.User;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,9 @@ public class QuizUserManager {
 
 
     public User createUser(String username){
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username must not be blank");
+        }
         User u = new User();
         u.setUsername(username);
         u.setUserId(idCounter.getAndIncrement());
@@ -29,9 +33,8 @@ public class QuizUserManager {
     }
 
     public User incrementScore(String token, int value){
-        User u = activeUsers.get(token);
-        int score = u.getScore() + value;
-        u.setScore(score);
+        User u = findUser(token).orElseThrow(() -> new UserNotFoundException(token));
+        u.setScore(u.getScore() + value);
         return u;
     }
 
@@ -48,10 +51,5 @@ public class QuizUserManager {
             return Optional.empty();
         }
         return Optional.ofNullable(getUser(token));
-    }
-
-
-    public Map<String, User> getAllUsers(){
-        return activeUsers;
     }
 }

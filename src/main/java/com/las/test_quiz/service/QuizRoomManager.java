@@ -1,6 +1,7 @@
 package com.las.test_quiz.service;
 
 import com.las.test_quiz.annotation.CheckHost;
+import com.las.test_quiz.dto.RoomDTO;
 import com.las.test_quiz.dto.UserInRoomDTO;
 import com.las.test_quiz.exception.RoomNotFoundException;
 import com.las.test_quiz.model.Question;
@@ -37,10 +38,7 @@ public class QuizRoomManager {
     }
 
     public Map<String, String> addUserToRoom(String roomCode, String username, String userToken){
-        Room room = activeRooms.get(roomCode);
-        if(room == null){
-            return Map.of("error", "Room not found");
-        }
+        Room room =getRoomOrThrow(roomCode);
 
         synchronized (room){
             User user;
@@ -64,15 +62,10 @@ public class QuizRoomManager {
     }
 
     public Map<String, String> deleteUserFromRoom(String roomCode, String userToken){
-        Room room = getRoom(roomCode);
-        if(room == null){
-            return Map.of("error", "Room not found");
-        }
+        Room room = getRoomOrThrow(roomCode);
         if(userToken == null){
             return Map.of("error", "User not found");
         }
-
-
         synchronized (room){
             Map<String, User> users = room.getUsers();
 
@@ -118,31 +111,34 @@ public class QuizRoomManager {
     }
 
     @CheckHost
-    public Map<String, String> startGame(String roomCode, String hostToken){
+    public Room startGame(String roomCode, String hostToken){
         Room room = getRoomOrThrow(roomCode);
         room.setStatus(RoomStatus.PLAYING);
         room.setCurrentQuestionIndex(0);
-        return Map.of("result", "success");
+        return room;
     }
 
     @CheckHost
-    public Map<String, String> pauseGame(String roomCode, String hostToken){
+    public Room pauseGame(String roomCode, String hostToken){
         Room room = getRoomOrThrow(roomCode);
         room.setStatus(RoomStatus.PAUSED);
-        return Map.of("result", "success");
+        return room;
     }
 
     @CheckHost
-    public Map<String, String> resumeGame(String roomCode, String hostToken){
+    public Room resumeGame(String roomCode, String hostToken){
         Room room = getRoomOrThrow(roomCode);
         room.setStatus(RoomStatus.PLAYING);
-        return Map.of("result", "success");
+        return room;
     }
 
     @CheckHost
-    public Map<String, String> deleteRoom(String roomCode, String hostToken){
+    public Room deleteRoom(String roomCode, String hostToken){
+        Room r = getRoomOrThrow(roomCode);
         closeRoom(roomCode);
-        return Map.of("result", "success");
+        r.setStatus(RoomStatus.CLOSED);
+        return r;
+
     }
 
 
@@ -160,12 +156,6 @@ public class QuizRoomManager {
     public Room getRoomOrThrow(String roomCode){
         return findRoom(roomCode)
                 .orElseThrow(() -> new RoomNotFoundException(roomCode));
-    }
-
-
-
-    public Map<String, Room> getAllRooms(){
-        return activeRooms;
     }
 
 

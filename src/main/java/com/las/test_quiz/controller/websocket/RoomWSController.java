@@ -2,7 +2,6 @@ package com.las.test_quiz.controller.websocket;
 
 import com.las.test_quiz.dto.RoomDTO;
 import com.las.test_quiz.model.Room;
-import com.las.test_quiz.model.RoomStatus;
 import com.las.test_quiz.service.QuizRoomManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -33,75 +32,74 @@ public class RoomWSController {
             token = payload.get("userToken");
         }
 
-        Map<String, String> result = roomManager.addUserToRoom(roomCode, username, token);
-
-        return result;
+        return roomManager.addUserToRoom(roomCode, username, token);
     }
 
     @MessageMapping("/rooms/{roomCode}/deleteUser")
-    public Map<String, String> deleteUser(Map<String, String> payload,
-                                       @DestinationVariable String roomCode){
-        String token = null;
-        if (payload != null){
-            token = payload.get("userToken");
-        }
+    public Map<String, String> deleteUser(Map<String, String> payload, @DestinationVariable String roomCode){
+        Map<String, String> result = roomManager.deleteUserFromRoom(roomCode, payload.get("userToken"));
 
-        Map<String, String> result = roomManager.deleteUserFromRoom(roomCode, token);
-
-        if (!result.containsKey("error")) {
-
-            Optional<Room> r = roomManager.findRoom(roomCode);
-            Object response;
-            if(r.isPresent()){
-                Room room = r.get();
-                response = RoomDTO.builder()
+        Optional<Room> r = roomManager.findRoom(roomCode);
+        Object response = r.map(room -> (Object) RoomDTO.builder()
                         .roomCode(room.getRoomCode())
                         .users(roomManager.getUsersInRoom(room.getRoomCode()))
                         .status(room.getStatus())
-                        .build();
-            }else{
-                response = Map.of("status", "CLOSED");
-            }
-            messagingTemplate.convertAndSend("/topic/room/" + roomCode, response);
-        }
+                        .build())
+                .orElse(Map.of("status", "CLOSED"));
 
+        messagingTemplate.convertAndSend("/topic/room/" + roomCode, response);
         return result;
     }
 
-
     @MessageMapping("/rooms/{roomCode}/start")
-    public void startGame(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
-        Map<String, String> result = roomManager.startGame(roomCode, payload.get("token"));
-        if(result.get("result").equals("success")){
-            result = Map.of("status", "PLAYING");
-            messagingTemplate.convertAndSend("/topic/room/" + roomCode, result);
-        }
+    @SendToUser("/game/actions")
+    public Map<String, String> startGame(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
+        Room room = roomManager.startGame(roomCode, payload.get("userToken"));
+        RoomDTO response = RoomDTO.builder()
+                .roomCode(room.getRoomCode())
+                .users(roomManager.getUsersInRoom(room.getRoomCode()))
+                .status(room.getStatus())
+                .build();
+        messagingTemplate.convertAndSend("/topic/room/" + roomCode, response);
+        return Map.of("status", "success", "message", "Game started successfully");
     }
 
     @MessageMapping("/rooms/{roomCode}/pause")
-    public void pauseGame(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
-        Map<String, String> result = roomManager.pauseGame(roomCode, payload.get("token"));
-        if(result.get("result").equals("success")){
-            result = Map.of("status", "PAUSED");
-            messagingTemplate.convertAndSend("/topic/room/" + roomCode, result);
-        }
+    @SendToUser("/game/actions")
+    public Map<String, String> pauseGame(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
+        Room room = roomManager.pauseGame(roomCode, payload.get("userToken"));
+        RoomDTO response = RoomDTO.builder()
+                .roomCode(room.getRoomCode())
+                .users(roomManager.getUsersInRoom(room.getRoomCode()))
+                .status(room.getStatus())
+                .build();
+        messagingTemplate.convertAndSend("/topic/room/" + roomCode, response);
+        return Map.of("status", "success", "message", "Game paused successfully");
     }
 
     @MessageMapping("/rooms/{roomCode}/resume")
-    public void resumeGame(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
-        Map<String, String> result = roomManager.resumeGame(roomCode, payload.get("token"));
-        if(result.get("result").equals("success")){
-            result = Map.of("status", "PLAYING");
-            messagingTemplate.convertAndSend("/topic/room/" + roomCode, result);
-        }
+    @SendToUser("/game/actions")
+    public Map<String, String> resumeGame(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
+        Room room = roomManager.resumeGame(roomCode, payload.get("userToken"));
+        RoomDTO response = RoomDTO.builder()
+                .roomCode(room.getRoomCode())
+                .users(roomManager.getUsersInRoom(room.getRoomCode()))
+                .status(room.getStatus())
+                .build();
+        messagingTemplate.convertAndSend("/topic/room/" + roomCode, response);
+        return Map.of("status", "success", "message", "Game resumed successfully");
     }
 
-    @MessageMapping("/rooms/{roomCode}/resume")
-    public void deleteRoom(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
-        Map<String, String> result = roomManager.resumeGame(roomCode, payload.get("token"));
-        if(result.get("result").equals("success")){
-            result = Map.of("status", "CLOSED");
-            messagingTemplate.convertAndSend("/topic/room/" + roomCode, result);
-        }
+    @MessageMapping("/rooms/{roomCode}/delete")
+    @SendToUser("/game/actions")
+    public Map<String, String> deleteRoom(@DestinationVariable String roomCode, @Payload Map<String, String> payload){
+        Room room = roomManager.deleteRoom(roomCode, payload.get("userToken"));
+        RoomDTO response = RoomDTO.builder()
+                .roomCode(room.getRoomCode())
+                .users(roomManager.getUsersInRoom(room.getRoomCode()))
+                .status(room.getStatus())
+                .build();
+        messagingTemplate.convertAndSend("/topic/room/" + roomCode, response);
+        return Map.of("status", "success", "message", "Room deleted successfully");
     }
 }

@@ -1,6 +1,5 @@
 import * as ws from "../network/ws.js";
 import * as ui from "../ui.js";
-import {setCode} from "../ui.js";
 
 
 
@@ -53,5 +52,50 @@ export async function joinRoom(roomCode) {
             roomSubscription.unsubscribe();
         }
 
+    }
+}
+
+
+export async function handleStartGame() {
+    let userToken = sessionStorage.getItem("userToken");
+    let roomCode = sessionStorage.getItem("roomCode");
+
+    try {
+        await ws.sendGameAction("start", roomCode, userToken);
+    } catch (err) {
+        alert("Error : " + err.message);
+    }
+}
+
+export async function handlePauseGame() {
+    let userToken = sessionStorage.getItem("userToken");
+    let roomCode = sessionStorage.getItem("roomCode");
+
+    try {
+        await ws.sendGameAction("pause", roomCode, userToken);
+    } catch (err) {
+        alert("Error : " + err.message);
+    }
+}
+
+export async function handleResumeGame() {
+    let userToken = sessionStorage.getItem("userToken");
+    let roomCode = sessionStorage.getItem("roomCode");
+
+    try {
+        await ws.sendGameAction("resume", roomCode, userToken);
+    } catch (err) {
+        alert("Error : " + err.message);
+    }
+}
+
+export async function handleDeleteRoom() {
+    let userToken = sessionStorage.getItem("userToken");
+    let roomCode = sessionStorage.getItem("roomCode");
+
+    try {
+        await ws.sendGameAction("delete", roomCode, userToken);
+    } catch (err) {
+        alert("Error : " + err.message);
     }
 }

@@ -17,6 +17,11 @@ window.onload = function (){
     bindButton("login--username-submit", main.handleLoginRoomBtn);
     bindButton("room-screen--exit-btn", room.handleExitRoom);
 
+    bindButton("start-game-btn", room.handleStartGame);
+    bindButton("pause-game-btn", room.handlePauseGame);
+    bindButton("resume-game-btn", room.handleResumeGame);
+    bindButton("delete-room-btn", room.handleDeleteRoom);
+
     bindButton("room-screen--code-placeholder", room.handleCopyCode);
 }
 

@@ -4,6 +4,7 @@ import com.las.test_quiz.annotation.CheckHost;
 import com.las.test_quiz.dto.RoomDTO;
 import com.las.test_quiz.dto.UserInRoomDTO;
 import com.las.test_quiz.exception.RoomNotFoundException;
+import com.las.test_quiz.exception.UserNotFoundException;
 import com.las.test_quiz.model.Question;
 import com.las.test_quiz.model.Room;
 import com.las.test_quiz.model.RoomStatus;
@@ -64,7 +65,7 @@ public class QuizRoomManager {
     public Map<String, String> deleteUserFromRoom(String roomCode, String userToken){
         Room room = getRoomOrThrow(roomCode);
         if(userToken == null){
-            return Map.of("error", "User not found");
+            throw new UserNotFoundException("null token");
         }
         synchronized (room){
             Map<String, User> users = room.getUsers();
